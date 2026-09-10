@@ -29,13 +29,25 @@ CREATE TABLE tipo_eficacia (
 );
 
 -- -----------------------------------------------------------------------------
--- 3. ESPÉCIE POKÉMON (Pokédex 1 a 151 com Stats Base, Tipos, EXP Yield)
+-- 2.1. TABELA DE HABILIDADES (Abilities Gen 3)
+-- -----------------------------------------------------------------------------
+CREATE TABLE habilidade (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(50) NOT NULL UNIQUE,
+    descricao VARCHAR(255) NOT NULL,
+    efeito_tipo VARCHAR(50) NOT NULL DEFAULT 'PASSIVA'
+);
+
+-- -----------------------------------------------------------------------------
+-- 3. ESPÉCIE POKÉMON (Pokédex 1 a 151 com Stats Base, Tipos, Habilidades, EXP Yield)
 -- -----------------------------------------------------------------------------
 CREATE TABLE especie_pokemon (
     id_pokedex INT PRIMARY KEY,
     nome VARCHAR(50) NOT NULL UNIQUE,
     tipo1_id INT NOT NULL,
     tipo2_id INT NULL,
+    habilidade1_id INT NULL,
+    habilidade2_id INT NULL,
     hp_base INT NOT NULL,
     ataque_base INT NOT NULL,
     defesa_base INT NOT NULL,
@@ -50,7 +62,9 @@ CREATE TABLE especie_pokemon (
     ev_sp_defesa_yield INT NOT NULL DEFAULT 0,
     ev_velocidade_yield INT NOT NULL DEFAULT 0,
     CONSTRAINT fk_esp_tipo1 FOREIGN KEY (tipo1_id) REFERENCES tipo(id),
-    CONSTRAINT fk_esp_tipo2 FOREIGN KEY (tipo2_id) REFERENCES tipo(id)
+    CONSTRAINT fk_esp_tipo2 FOREIGN KEY (tipo2_id) REFERENCES tipo(id),
+    CONSTRAINT fk_esp_hab1 FOREIGN KEY (habilidade1_id) REFERENCES habilidade(id),
+    CONSTRAINT fk_esp_hab2 FOREIGN KEY (habilidade2_id) REFERENCES habilidade(id)
 );
 
 -- -----------------------------------------------------------------------------
@@ -77,6 +91,9 @@ CREATE TABLE movimento (
     poder INT NULL, -- NULL para golpes de status
     precisao INT NULL, -- NULL para golpes que não erram (Swift, etc.)
     pp_maximo INT NOT NULL,
+    efeito_tipo VARCHAR(40) NULL DEFAULT NULL,
+    efeito_chance TINYINT NOT NULL DEFAULT 100,
+    efeito_valor INT NOT NULL DEFAULT 0,
     CONSTRAINT fk_mov_tipo FOREIGN KEY (tipo_id) REFERENCES tipo(id)
 );
 
@@ -175,10 +192,21 @@ CREATE TABLE pokemon_instancia (
     especie_id INT NOT NULL,
     apelido VARCHAR(50) NULL,
     held_item_id INT NULL,
+    habilidade_id INT NULL,
     nivel INT NOT NULL DEFAULT 5,
     experiencia_atual INT NOT NULL DEFAULT 0,
     posicao_time INT NOT NULL DEFAULT 1, -- 1 a 6 no time, > 6 no PC (Box)
     esta_desmaiado BOOLEAN NOT NULL DEFAULT FALSE,
+    condicao_status ENUM('NENHUM', 'PARALISIA', 'SONO', 'ENVENENAMENTO', 'QUEIMADURA', 'CONGELAMENTO') NOT NULL DEFAULT 'NENHUM',
+    turnos_sono TINYINT NOT NULL DEFAULT 0,
+    
+    -- Modificadores de Estágio (-6 a +6 em combate)
+    mod_ataque TINYINT NOT NULL DEFAULT 0,
+    mod_defesa TINYINT NOT NULL DEFAULT 0,
+    mod_sp_ataque TINYINT NOT NULL DEFAULT 0,
+    mod_sp_defesa TINYINT NOT NULL DEFAULT 0,
+    mod_velocidade TINYINT NOT NULL DEFAULT 0,
+    mod_precisao TINYINT NOT NULL DEFAULT 0,
     
     -- Atributos Atuais em Combate
     hp_atual INT NOT NULL,
@@ -207,7 +235,8 @@ CREATE TABLE pokemon_instancia (
 
     CONSTRAINT fk_pok_treinador FOREIGN KEY (treinador_id) REFERENCES treinador(id) ON DELETE CASCADE,
     CONSTRAINT fk_pok_especie FOREIGN KEY (especie_id) REFERENCES especie_pokemon(id_pokedex),
-    CONSTRAINT fk_pi_held_item FOREIGN KEY (held_item_id) REFERENCES held_item(id)
+    CONSTRAINT fk_pi_held_item FOREIGN KEY (held_item_id) REFERENCES held_item(id),
+    CONSTRAINT fk_pi_habilidade FOREIGN KEY (habilidade_id) REFERENCES habilidade(id)
 );
 
 -- -----------------------------------------------------------------------------
@@ -234,6 +263,8 @@ CREATE TABLE batalha (
     treinador_oponente_id INT NOT NULL,
     data_inicio DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     status ENUM('EM_ANDAMENTO', 'VITORIA_JOGADOR', 'DERROTA_JOGADOR', 'EMPATE') NOT NULL DEFAULT 'EM_ANDAMENTO',
+    clima ENUM('NENHUM', 'CHUVA', 'SOL', 'TEMPESTADE_AREIA', 'GRANIZO') NOT NULL DEFAULT 'NENHUM',
+    turnos_clima TINYINT NOT NULL DEFAULT 0,
     pokemon_ativo_jogador_id INT NULL,
     pokemon_ativo_oponente_id INT NULL,
     vencedor_id INT NULL,
