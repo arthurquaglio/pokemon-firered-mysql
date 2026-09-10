@@ -7,13 +7,21 @@ export async function obterTimeTreinador(req, res) {
     const [pokemons] = await pool.query(
       `SELECT pi.*, 
               ep.nome as especie_nome, ep.id_pokedex,
+              ep.hp_base, ep.ataque_base, ep.defesa_base, ep.sp_ataque_base, ep.sp_defesa_base, ep.velocidade_base,
+              ep.habilidade1_id, ep.habilidade2_id,
+              hab1.nome_formatado as habilidade1_nome, hab1.descricao as habilidade1_descricao,
+              hab2.nome_formatado as habilidade2_nome, hab2.descricao as habilidade2_descricao,
               t1.nome as tipo1_nome, t2.nome as tipo2_nome,
-              hi.nome as held_item_nome, hi.descricao as held_item_descricao, hi.efeito_tipo as held_item_efeito
+              hi.nome as held_item_nome, hi.descricao as held_item_descricao, hi.efeito_tipo as held_item_efeito,
+              h.nome as habilidade_nome, h.nome_formatado as habilidade_nome_formatado, h.descricao as habilidade_descricao, h.efeito_tipo as habilidade_efeito
        FROM pokemon_instancia pi
        JOIN especie_pokemon ep ON pi.especie_id = ep.id_pokedex
        LEFT JOIN tipo t1 ON ep.tipo1_id = t1.id
        LEFT JOIN tipo t2 ON ep.tipo2_id = t2.id
        LEFT JOIN held_item hi ON pi.held_item_id = hi.id
+       LEFT JOIN habilidade h ON pi.habilidade_id = h.id
+       LEFT JOIN habilidade hab1 ON ep.habilidade1_id = hab1.id
+       LEFT JOIN habilidade hab2 ON ep.habilidade2_id = hab2.id
        WHERE pi.treinador_id = ? AND pi.posicao_time <= 6
        ORDER BY pi.posicao_time ASC`,
       [id]
@@ -230,3 +238,87 @@ export async function atualizarMochila(req, res) {
     return res.status(400).json({ sucesso: false, erro: error.message });
   }
 }
+
+// PUT /api/pokemon/:id/stats
+export async function atualizarStatsPokemon(req, res) {
+  const { id } = req.params;
+  const {
+    iv_hp, iv_ataque, iv_defesa, iv_sp_ataque, iv_sp_defesa, iv_velocidade,
+    ev_hp, ev_ataque, ev_defesa, ev_sp_ataque, ev_sp_defesa, ev_velocidade
+  } = req.body;
+
+  try {
+    const [results] = await pool.query(
+      'CALL sp_atualizar_ivs_evs_pokemon(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [
+        id,
+        parseInt(iv_hp, 10) || 0,
+        parseInt(iv_ataque, 10) || 0,
+        parseInt(iv_defesa, 10) || 0,
+        parseInt(iv_sp_ataque, 10) || 0,
+        parseInt(iv_sp_defesa, 10) || 0,
+        parseInt(iv_velocidade, 10) || 0,
+        parseInt(ev_hp, 10) || 0,
+        parseInt(ev_ataque, 10) || 0,
+        parseInt(ev_defesa, 10) || 0,
+        parseInt(ev_sp_ataque, 10) || 0,
+        parseInt(ev_sp_defesa, 10) || 0,
+        parseInt(ev_velocidade, 10) || 0
+      ]
+    );
+
+    // Buscar o pokémon atualizado
+    const [pokemons] = await pool.query(
+      `SELECT pi.*, 
+              ep.nome as especie_nome, ep.id_pokedex,
+              ep.hp_base, ep.ataque_base, ep.defesa_base, ep.sp_ataque_base, ep.sp_defesa_base, ep.velocidade_base,
+              ep.habilidade1_id, ep.habilidade2_id,
+              hab1.nome_formatado as habilidade1_nome, hab1.descricao as habilidade1_descricao,
+              hab2.nome_formatado as habilidade2_nome, hab2.descricao as habilidade2_descricao,
+              t1.nome as tipo1_nome, t2.nome as tipo2_nome,
+              hi.nome as held_item_nome, hi.descricao as held_item_descricao, hi.efeito_tipo as held_item_efeito,
+              h.nome as habilidade_nome, h.nome_formatado as habilidade_nome_formatado, h.descricao as habilidade_descricao, h.efeito_tipo as habilidade_efeito
+       FROM pokemon_instancia pi
+       JOIN especie_pokemon ep ON pi.especie_id = ep.id_pokedex
+       LEFT JOIN tipo t1 ON ep.tipo1_id = t1.id
+       LEFT JOIN tipo t2 ON ep.tipo2_id = t2.id
+       LEFT JOIN held_item hi ON pi.held_item_id = hi.id
+       LEFT JOIN habilidade h ON pi.habilidade_id = h.id
+       LEFT JOIN habilidade hab1 ON ep.habilidade1_id = hab1.id
+       LEFT JOIN habilidade hab2 ON ep.habilidade2_id = hab2.id
+       WHERE pi.id = ?`,
+      [id]
+    );
+
+    return res.json({
+      sucesso: true,
+      mensagem: results[0]?.[0]?.status || 'Atributos atualizados!',
+      pokemon: pokemons[0]
+    });
+  } catch (error) {
+    console.error('Erro em atualizarStatsPokemon:', error);
+    return res.status(400).json({ sucesso: false, erro: error.message });
+  }
+}
+
+// PUT /api/pokemon/:id/habilidade
+export async function atualizarHabilidadePokemon(req, res) {
+  const { id } = req.params;
+  const { habilidadeId } = req.body;
+
+  try {
+    const [results] = await pool.query(
+      'CALL sp_atualizar_habilidade_pokemon(?, ?)',
+      [id, habilidadeId]
+    );
+
+    return res.json({
+      sucesso: true,
+      mensagem: results[0]?.[0]?.status || 'Habilidade atualizada com sucesso!'
+    });
+  } catch (error) {
+    console.error('Erro em atualizarHabilidadePokemon:', error);
+    return res.status(400).json({ sucesso: false, erro: error.message });
+  }
+}
+

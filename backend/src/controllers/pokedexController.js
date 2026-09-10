@@ -3,7 +3,7 @@ import pool from '../config/database.js';
 // GET /api/pokedex
 export async function listarPokedex(req, res) {
   try {
-    const [rows] = await pool.query('SELECT * FROM vw_pokedex_kanto ORDER BY id_pokedex ASC');
+    const [rows] = await pool.query('SELECT *, tipo1 as tipo1_nome, tipo2 as tipo2_nome FROM vw_pokedex_kanto ORDER BY id_pokedex ASC');
     return res.json({ sucesso: true, dados: rows });
   } catch (error) {
     console.error('Erro em listarPokedex:', error);

@@ -22,12 +22,15 @@ async function buscarDetalhesBatalha(batalhaId) {
     const [poksJog] = await pool.query(
       `SELECT pi.*, ep.nome as especie_nome, ep.id_pokedex,
               t1.nome as tipo1_nome, t2.nome as tipo2_nome,
-              hi.nome as held_item_nome
+              hi.nome as held_item_nome,
+              h.nome as habilidade_nome, h.nome_formatado as habilidade_nome_formatado,
+              h.descricao as habilidade_descricao, h.efeito_tipo as habilidade_efeito
        FROM pokemon_instancia pi
        JOIN especie_pokemon ep ON pi.especie_id = ep.id_pokedex
        LEFT JOIN tipo t1 ON ep.tipo1_id = t1.id
        LEFT JOIN tipo t2 ON ep.tipo2_id = t2.id
        LEFT JOIN held_item hi ON pi.held_item_id = hi.id
+       LEFT JOIN habilidade h ON pi.habilidade_id = h.id
        WHERE pi.id = ?`,
       [batalha.pokemon_ativo_jogador_id]
     );
@@ -35,6 +38,7 @@ async function buscarDetalhesBatalha(batalhaId) {
       const [movs] = await pool.query(
         `SELECT pma.slot_numero, pma.pp_atual, m.id as movimento_id, m.nome,
                 m.poder, m.precisao, m.pp_maximo, m.categoria, m.prioridade,
+                m.efeito_tipo, m.efeito_chance,
                 t.nome as tipo_nome
          FROM pokemon_movimento_ativo pma
          JOIN movimento m ON pma.movimento_id = m.id
@@ -53,12 +57,15 @@ async function buscarDetalhesBatalha(batalhaId) {
     const [poksOpo] = await pool.query(
       `SELECT pi.*, ep.nome as especie_nome, ep.id_pokedex,
               t1.nome as tipo1_nome, t2.nome as tipo2_nome,
-              hi.nome as held_item_nome
+              hi.nome as held_item_nome,
+              h.nome as habilidade_nome, h.nome_formatado as habilidade_nome_formatado,
+              h.descricao as habilidade_descricao, h.efeito_tipo as habilidade_efeito
        FROM pokemon_instancia pi
        JOIN especie_pokemon ep ON pi.especie_id = ep.id_pokedex
        LEFT JOIN tipo t1 ON ep.tipo1_id = t1.id
        LEFT JOIN tipo t2 ON ep.tipo2_id = t2.id
        LEFT JOIN held_item hi ON pi.held_item_id = hi.id
+       LEFT JOIN habilidade h ON pi.habilidade_id = h.id
        WHERE pi.id = ?`,
       [batalha.pokemon_ativo_oponente_id]
     );
@@ -71,13 +78,16 @@ async function buscarDetalhesBatalha(batalhaId) {
   const [timeJogador] = await pool.query(
     `SELECT pi.id, pi.apelido, pi.especie_id, ep.nome as especie_nome,
             pi.nivel, pi.hp_atual, pi.hp_max, pi.esta_desmaiado, pi.posicao_time,
+            pi.condicao_status,
             t1.nome as tipo1_nome, t2.nome as tipo2_nome,
-            hi.nome as held_item_nome
+            hi.nome as held_item_nome,
+            h.nome_formatado as habilidade_nome
      FROM pokemon_instancia pi
      JOIN especie_pokemon ep ON pi.especie_id = ep.id_pokedex
      LEFT JOIN tipo t1 ON ep.tipo1_id = t1.id
      LEFT JOIN tipo t2 ON ep.tipo2_id = t2.id
      LEFT JOIN held_item hi ON pi.held_item_id = hi.id
+     LEFT JOIN habilidade h ON pi.habilidade_id = h.id
      WHERE pi.treinador_id = ? AND pi.posicao_time <= 6
      ORDER BY pi.posicao_time ASC`,
     [batalha.treinador_jogador_id]

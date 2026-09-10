@@ -14,7 +14,9 @@ import {
   trocarGolpe,
   centroPokemon,
   obterMochila,
-  atualizarMochila
+  atualizarMochila,
+  atualizarStatsPokemon,
+  atualizarHabilidadePokemon
 } from '../controllers/teambuilderController.js';
 import {
   iniciarBatalha,
@@ -48,6 +50,8 @@ router.post('/pokemon/remover', removerPokemon);
 router.post('/pokemon/held-item', equiparHeldItem);
 router.post('/pokemon/remover-held-item', removerHeldItem);
 router.post('/pokemon/trocar-golpe', trocarGolpe);
+router.put('/pokemon/:id/stats', atualizarStatsPokemon);
+router.put('/pokemon/:id/habilidade', atualizarHabilidadePokemon);
 router.post('/centro-pokemon', centroPokemon);
 
 // ==========================================
