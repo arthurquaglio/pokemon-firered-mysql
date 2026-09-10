@@ -61,15 +61,13 @@ export async function criarPokemon(req, res) {
     );
 
     if (existente.length > 0) {
-      // Move o existente para fora do time ativo (posicao 99) ou deleta se for substituição direta
-      await pool.query(
-        'DELETE FROM pokemon_movimento_ativo WHERE pokemon_instancia_id = ?',
-        [existente[0].id]
-      );
-      await pool.query(
-        'DELETE FROM pokemon_instancia WHERE id = ?',
-        [existente[0].id]
-      );
+      const oldId = existente[0].id;
+      // Limpa referências em batalhas e logs passados para permitir exclusão limpa
+      await pool.query('UPDATE batalha SET pokemon_ativo_jogador_id = NULL WHERE pokemon_ativo_jogador_id = ?', [oldId]);
+      await pool.query('UPDATE batalha SET pokemon_ativo_oponente_id = NULL WHERE pokemon_ativo_oponente_id = ?', [oldId]);
+      await pool.query('DELETE FROM log_batalha WHERE pokemon_atacante_id = ? OR pokemon_defensor_id = ?', [oldId, oldId]);
+      await pool.query('DELETE FROM pokemon_movimento_ativo WHERE pokemon_instancia_id = ?', [oldId]);
+      await pool.query('DELETE FROM pokemon_instancia WHERE id = ?', [oldId]);
     }
 
     // Se não informou apelido, pega o nome da espécie
@@ -99,6 +97,10 @@ export async function criarPokemon(req, res) {
 export async function removerPokemon(req, res) {
   const { pokemonId } = req.body;
   try {
+    // Limpa referências em batalhas e logs passados para permitir exclusão limpa
+    await pool.query('UPDATE batalha SET pokemon_ativo_jogador_id = NULL WHERE pokemon_ativo_jogador_id = ?', [pokemonId]);
+    await pool.query('UPDATE batalha SET pokemon_ativo_oponente_id = NULL WHERE pokemon_ativo_oponente_id = ?', [pokemonId]);
+    await pool.query('DELETE FROM log_batalha WHERE pokemon_atacante_id = ? OR pokemon_defensor_id = ?', [pokemonId, pokemonId]);
     await pool.query('DELETE FROM pokemon_movimento_ativo WHERE pokemon_instancia_id = ?', [pokemonId]);
     await pool.query('DELETE FROM pokemon_instancia WHERE id = ?', [pokemonId]);
     return res.json({ sucesso: true, mensagem: 'Pokémon removido com sucesso!' });

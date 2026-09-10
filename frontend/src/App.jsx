@@ -25,6 +25,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [joyLoading, setJoyLoading] = useState(false);
   const [notification, setNotification] = useState(null);
+  const [editingTrainerId, setEditingTrainerId] = useState(1);
 
   // Exibir toast / notificação retrô
   const notify = (msg, type = 'info') => {
@@ -121,8 +122,9 @@ export default function App() {
     if (window.confirm('Deseja realmente fugir/encerrar a batalha atual?')) {
       try {
         await cancelarBatalha(batalhaEstado.batalha.id);
+        setBatalhaEstado(null);
+        setActiveTab('opponents');
         notify('Você fugiu com segurança da batalha!', 'info');
-        handleIniciarBatalha(2, true);
       } catch (err) {
         notify(`Erro ao fugir: ${err.message}`, 'error');
       }
@@ -237,6 +239,8 @@ export default function App() {
 
         {activeTab === 'teambuilder' && (
           <TeamOverview
+            selectedTrainerId={editingTrainerId}
+            onSelectTrainerId={setEditingTrainerId}
             mochila={mochila}
             onReloadMochila={carregarMochila}
             onStartBattle={() => setActiveTab('opponents')}
@@ -248,6 +252,10 @@ export default function App() {
           <OpponentPicker
             onSelectOpponent={(id) => handleIniciarBatalha(id, true)}
             onStartBattle={(id) => handleIniciarBatalha(id, true)}
+            onEditTeam={(id) => {
+              setEditingTrainerId(id);
+              setActiveTab('teambuilder');
+            }}
             loading={loading}
           />
         )}

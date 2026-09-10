@@ -7,6 +7,7 @@ import BagBuilderModal from './BagBuilderModal';
 import {
   getPokedex,
   getHeldItems,
+  getTreinadores,
   getTimeTreinador,
   criarPokemon,
   removerPokemon,
@@ -19,11 +20,15 @@ import {
 import sounds from '../../services/soundEffects';
 
 export default function TeamOverview({
+  selectedTrainerId = 1,
+  onSelectTrainerId,
   mochila = [],
   onReloadMochila,
   onStartBattle,
   onNotify
 }) {
+  const [currentTrainerId, setCurrentTrainerId] = useState(selectedTrainerId);
+  const [treinadores, setTreinadores] = useState([]);
   const [time, setTime] = useState([]);
   const [pokedex, setPokedex] = useState([]);
   const [heldItems, setHeldItems] = useState([]);
@@ -35,21 +40,40 @@ export default function TeamOverview({
   const [activeMoveTarget, setActiveMoveTarget] = useState(null); // { pokemon, movimentoAtual }
   const [showBagBuilder, setShowBagBuilder] = useState(false);
 
-  // Carregar dados iniciais do time, pokédex e held items
-  const carregarDados = async () => {
+  // Sincronizar com props externas
+  useEffect(() => {
+    if (selectedTrainerId && selectedTrainerId !== currentTrainerId) {
+      setCurrentTrainerId(selectedTrainerId);
+    }
+  }, [selectedTrainerId]);
+
+  // Carregar dados gerais (treinadores, pokédex, held items)
+  useEffect(() => {
+    async function loadMeta() {
+      try {
+        const [resTreinadores, resPokedex, resItems] = await Promise.all([
+          getTreinadores(),
+          getPokedex(),
+          getHeldItems()
+        ]);
+        if (resTreinadores.sucesso) setTreinadores(resTreinadores.dados);
+        if (resPokedex.sucesso) setPokedex(resPokedex.dados);
+        if (resItems.sucesso) setHeldItems(resItems.dados);
+      } catch (err) {
+        console.error('Erro ao carregar dados do Teambuilder:', err);
+      }
+    }
+    loadMeta();
+  }, []);
+
+  // Carregar time do treinador selecionado
+  const carregarTime = async (tId) => {
     try {
       setLoading(true);
-      const [resTime, resPokedex, resItems] = await Promise.all([
-        getTimeTreinador(1),
-        getPokedex(),
-        getHeldItems()
-      ]);
-
-      if (resTime.sucesso) setTime(resTime.dados);
-      if (resPokedex.sucesso) setPokedex(resPokedex.dados);
-      if (resItems.sucesso) setHeldItems(resItems.dados);
+      const res = await getTimeTreinador(tId);
+      if (res.sucesso) setTime(res.dados);
     } catch (err) {
-      console.error('Erro ao carregar teambuilder:', err);
+      console.error('Erro ao carregar time:', err);
       onNotify(`Erro ao carregar time: ${err.message}`, 'error');
     } finally {
       setLoading(false);
@@ -57,25 +81,37 @@ export default function TeamOverview({
   };
 
   useEffect(() => {
-    carregarDados();
-  }, []);
+    carregarTime(currentTrainerId);
+  }, [currentTrainerId]);
+
+  const handleTrainerChange = (newId) => {
+    sounds.playSelect();
+    const idNum = parseInt(newId, 10);
+    setCurrentTrainerId(idNum);
+    if (onSelectTrainerId) onSelectTrainerId(idNum);
+  };
 
   // Adicionar / Substituir Pokémon no slot
   const handleSelectSpecies = async (especie) => {
     if (!activeSlotForPokemon) return;
     try {
+      // Obter nível médio do time atual ou padrão
+      const nivelPadrao = time.length > 0 ? time[0].nivel : 50;
+      const trainerInfo = treinadores.find((t) => t.id === currentTrainerId);
+      const apelido = `${especie.nome} do ${trainerInfo?.nome || 'Treinador'}`;
+
       const res = await criarPokemon({
-        treinadorId: 1,
+        treinadorId: currentTrainerId,
         especieId: especie.id_pokedex,
-        nivel: 50,
-        apelido: `${especie.nome} do Red`,
+        nivel: nivelPadrao,
+        apelido: apelido,
         posicaoTime: activeSlotForPokemon
       });
 
       if (res.sucesso) {
         onNotify(`${especie.nome} adicionado ao time!`, 'success');
         sounds.playPokemonCry(especie.id_pokedex);
-        await carregarDados();
+        await carregarTime(currentTrainerId);
       }
     } catch (err) {
       onNotify(`Erro ao adicionar pokémon: ${err.message}`, 'error');
@@ -89,8 +125,8 @@ export default function TeamOverview({
     try {
       const res = await removerPokemon(pokemonId);
       if (res.sucesso) {
-        onNotify('Pokémon removido do time.', 'info');
-        await carregarDados();
+        onNotify('Pokémon removido com sucesso!', 'info');
+        await carregarTime(currentTrainerId);
       }
     } catch (err) {
       onNotify(`Erro ao remover: ${err.message}`, 'error');
@@ -104,7 +140,7 @@ export default function TeamOverview({
       const res = await equiparHeldItem(activePokemonForItem.id, heldItemId);
       if (res.sucesso) {
         onNotify(res.mensagem, 'success');
-        await carregarDados();
+        await carregarTime(currentTrainerId);
       }
     } catch (err) {
       onNotify(`Erro ao equipar item: ${err.message}`, 'error');
@@ -120,7 +156,7 @@ export default function TeamOverview({
       const res = await removerHeldItem(activePokemonForItem.id);
       if (res.sucesso) {
         onNotify(res.mensagem, 'info');
-        await carregarDados();
+        await carregarTime(currentTrainerId);
       }
     } catch (err) {
       onNotify(`Erro ao remover item: ${err.message}`, 'error');
@@ -140,7 +176,7 @@ export default function TeamOverview({
       );
       if (res.sucesso) {
         onNotify(res.mensagem, 'success');
-        await carregarDados();
+        await carregarTime(currentTrainerId);
       }
     } catch (err) {
       onNotify(`Erro ao aprender golpe: ${err.message}`, 'error');
@@ -153,15 +189,15 @@ export default function TeamOverview({
   const handleJoyHeal = async () => {
     sounds.playNurseJoy();
     try {
-      const res = await chamarCentroPokemon(1);
+      const res = await chamarCentroPokemon(currentTrainerId);
       onNotify(res.mensagem, 'success');
-      await carregarDados();
+      await carregarTime(currentTrainerId);
     } catch (err) {
       onNotify(`Erro: ${err.message}`, 'error');
     }
   };
 
-  // Atualizar quantidade de itens na mochila
+  // Atualizar quantidade de itens na mochila (do jogador Red)
   const handleUpdateMochilaQty = async (itemId, quantidade) => {
     try {
       await atualizarMochila(1, itemId, quantidade);
@@ -171,6 +207,8 @@ export default function TeamOverview({
     }
   };
 
+  const activeTrainer = treinadores.find((t) => t.id === currentTrainerId) || { nome: 'Red', eh_jogador: 1 };
+
   // Mapear os 6 slots fixos
   const slots = [1, 2, 3, 4, 5, 6].map((pos) => {
     return time.find((p) => p.posicao_time === pos) || null;
@@ -178,7 +216,7 @@ export default function TeamOverview({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      {/* Barra de Ferramentas Superior */}
+      {/* Barra de Ferramentas Superior com Seletor de Treinador */}
       <div
         className="gba-panel-dark"
         style={{
@@ -187,41 +225,88 @@ export default function TeamOverview({
           justifyContent: 'space-between',
           alignItems: 'center',
           flexWrap: 'wrap',
-          gap: '14px'
+          gap: '16px'
         }}
       >
-        <div>
-          <h2 className="retro-text" style={{ fontSize: '14px', color: '#f59e0b', marginBottom: '4px' }}>
-            🛠️ Teambuilder Estilo Showdown
-          </h2>
-          <p style={{ fontSize: '12px', color: '#94a3b8' }}>
-            Personalize sua equipe de até 6 Pokémons, troque golpes e equipe Held Items oficiais.
-          </p>
+        {/* Seletor de Treinador */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <h2 className="retro-text" style={{ fontSize: '13px', color: '#f59e0b' }}>
+              🛠️ Editando Equipe de:
+            </h2>
+            <select
+              value={currentTrainerId}
+              onChange={(e) => handleTrainerChange(e.target.value)}
+              style={{
+                background: '#0f172a',
+                border: '2px solid #f59e0b',
+                color: '#fff',
+                padding: '8px 12px',
+                borderRadius: '8px',
+                fontFamily: 'var(--font-modern)',
+                fontSize: '13px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                outline: 'none'
+              }}
+            >
+              <optgroup label="Treinador Jogador">
+                <option value={1}>🔴 Red (Meu Time - Jogador)</option>
+              </optgroup>
+              <optgroup label="Campeão / Rival">
+                <option value={2}>👑 Blue (Campeão)</option>
+              </optgroup>
+              <optgroup label="Líderes de Ginásio (1 a 8)">
+                <option value={3}>🪨 Brock (Pewter)</option>
+                <option value={4}>💧 Misty (Cerulean)</option>
+                <option value={5}>⚡ Lt. Surge (Vermilion)</option>
+                <option value={6}>🌿 Erika (Celadon)</option>
+                <option value={7}>☠️ Koga (Fuchsia)</option>
+                <option value={8}>🔮 Sabrina (Saffron)</option>
+                <option value={9}>🔥 Blaine (Cinnabar)</option>
+                <option value={10}>🌍 Giovanni (Viridian)</option>
+              </optgroup>
+              <optgroup label="Elite dos Quatro">
+                <option value={11}>❄️ Lorelei (Elite 1 - Gelo)</option>
+                <option value={12}>🥊 Bruno (Elite 2 - Lutador)</option>
+                <option value={13}>👻 Agatha (Elite 3 - Fantasma)</option>
+                <option value={14}>🐉 Lance (Elite 4 - Dragão)</option>
+              </optgroup>
+            </select>
+          </div>
+          <span style={{ fontSize: '12px', color: '#94a3b8' }}>
+            {activeTrainer.eh_jogador
+              ? 'Este é o seu time oficial usado na Arena de Batalha.'
+              : `Você está editando a equipe do adversário oficial ${activeTrainer.nome}. As alterações refletirão nas batalhas!`}
+          </span>
         </div>
 
+        {/* Botões de Ação */}
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
           <button
             onClick={handleJoyHeal}
             className="btn-retro"
             style={{ background: '#ec4899', color: '#fff', fontSize: '10px' }}
           >
-            🏥 CENTRO POKÉMON
+            🏥 CURAR TIME (JOY)
           </button>
 
-          <button
-            onClick={() => { sounds.playSelect(); setShowBagBuilder(true); }}
-            className="btn-retro btn-bag"
-            style={{ fontSize: '10px' }}
-          >
-            🎒 MOCHILA ({mochila.reduce((acc, it) => acc + (it.quantidade || 0), 0)} itens)
-          </button>
+          {activeTrainer.eh_jogador ? (
+            <button
+              onClick={() => { sounds.playSelect(); setShowBagBuilder(true); }}
+              className="btn-retro btn-bag"
+              style={{ fontSize: '10px' }}
+            >
+              🎒 MOCHILA ({mochila.reduce((acc, it) => acc + (it.quantidade || 0), 0)} itens)
+            </button>
+          ) : null}
 
           <button
             onClick={() => { sounds.playSelect(); onStartBattle(); }}
             className="btn-retro btn-fight"
             style={{ fontSize: '10px' }}
           >
-            ⚔️ ENTRAR NA ARENA
+            ⚔️ DESAFIAR / BATALHAR
           </button>
         </div>
       </div>
