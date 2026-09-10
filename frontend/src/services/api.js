@@ -68,6 +68,18 @@ export const trocarGolpe = (pokemonId, movimentoAtualId, novoMovimentoId) =>
     body: JSON.stringify({ pokemonId, movimentoAtualId, novoMovimentoId })
   });
 
+export const atualizarStatsPokemon = (pokemonId, stats) =>
+  request(`/pokemon/${pokemonId}/stats`, {
+    method: 'PUT',
+    body: JSON.stringify(stats)
+  });
+
+export const atualizarHabilidadePokemon = (pokemonId, habilidadeId) =>
+  request(`/pokemon/${pokemonId}/habilidade`, {
+    method: 'PUT',
+    body: JSON.stringify({ habilidadeId })
+  });
+
 export const chamarCentroPokemon = (treinadorId = 1) =>
   request('/centro-pokemon', {
     method: 'POST',

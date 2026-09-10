@@ -1,26 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getMovimentosEspecie } from '../../services/api';
 import sounds from '../../services/soundEffects';
-
-const typeClassMap = {
-  Normal: 'type-normal',
-  Fogo: 'type-fogo',
-  Água: 'type-agua',
-  Planta: 'type-planta',
-  Elétrico: 'type-eletrico',
-  Gelo: 'type-gelo',
-  Lutador: 'type-lutador',
-  Venenoso: 'type-venenoso',
-  Terra: 'type-terra',
-  Voador: 'type-voador',
-  Psíquico: 'type-psiquico',
-  Inseto: 'type-inseto',
-  Pedra: 'type-pedra',
-  Fantasma: 'type-fantasma',
-  Dragão: 'type-dragao',
-  Aço: 'type-aco',
-  Noturno: 'type-noturno'
-};
+import { getTypeClass } from '../../utils/typeHelper';
 
 export default function MovePickerModal({
   pokemon,
@@ -123,7 +104,7 @@ export default function MovePickerModal({
           ) : (
             filteredMoves.map((mov) => {
               const isCurrent = mov.id === movimentoAtual?.movimento_id;
-              const typeClass = typeClassMap[mov.tipo_nome] || 'type-normal';
+              const typeClass = getTypeClass(mov.tipo_nome);
 
               return (
                 <button

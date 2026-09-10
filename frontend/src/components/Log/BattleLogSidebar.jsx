@@ -22,6 +22,36 @@ function getBadge(msg) {
   if (upper.includes('RESTAURADO') || upper.includes('RECUPEROU')) {
     return <span className="retro-text" style={{ fontSize: '8px', background: '#059669', color: '#fff', padding: '2px 6px', borderRadius: '4px' }}>CURA HP</span>;
   }
+  if (upper.includes('PARALISADO') || upper.includes('TOTALMENTE PARALISADO')) {
+    return <span className="retro-text" style={{ fontSize: '8px', background: '#ca8a04', color: '#000', padding: '2px 6px', borderRadius: '4px' }}>⚡ PARALISIA</span>;
+  }
+  if (upper.includes('DORMINDO') || upper.includes('ADORMECIDO')) {
+    return <span className="retro-text" style={{ fontSize: '8px', background: '#475569', color: '#fff', padding: '2px 6px', borderRadius: '4px' }}>💤 SONO</span>;
+  }
+  if (upper.includes('ENVENENADO')) {
+    return <span className="retro-text" style={{ fontSize: '8px', background: '#9333ea', color: '#fff', padding: '2px 6px', borderRadius: '4px' }}>☠️ VENENO</span>;
+  }
+  if (upper.includes('QUEIMADO') || upper.includes('QUEIMADURA')) {
+    return <span className="retro-text" style={{ fontSize: '8px', background: '#ea580c', color: '#fff', padding: '2px 6px', borderRadius: '4px' }}>🔥 QUEIMADURA</span>;
+  }
+  if (upper.includes('CONGELADO')) {
+    return <span className="retro-text" style={{ fontSize: '8px', background: '#0891b2', color: '#000', padding: '2px 6px', borderRadius: '4px' }}>❄️ CONGELADO</span>;
+  }
+  if (upper.includes('CHOVENDO') || upper.includes('CHUVA')) {
+    return <span className="retro-text" style={{ fontSize: '8px', background: '#0369a1', color: '#fff', padding: '2px 6px', borderRadius: '4px' }}>🌧️ CHUVA</span>;
+  }
+  if (upper.includes('SOL')) {
+    return <span className="retro-text" style={{ fontSize: '8px', background: '#d97706', color: '#fff', padding: '2px 6px', borderRadius: '4px' }}>☀️ SOL</span>;
+  }
+  if (upper.includes('HABILIDADE')) {
+    return <span className="retro-text" style={{ fontSize: '8px', background: '#4338ca', color: '#fff', padding: '2px 6px', borderRadius: '4px' }}>✨ HABILIDADE</span>;
+  }
+  if (upper.includes('SUBIU') || upper.includes('AUMENTOU')) {
+    return <span className="retro-text" style={{ fontSize: '8px', background: '#166534', color: '#fff', padding: '2px 6px', borderRadius: '4px' }}>▲ STATS +</span>;
+  }
+  if (upper.includes('CAIU') || upper.includes('DIMINUIU')) {
+    return <span className="retro-text" style={{ fontSize: '8px', background: '#991b1b', color: '#fff', padding: '2px 6px', borderRadius: '4px' }}>▼ STATS -</span>;
+  }
   return null;
 }
 

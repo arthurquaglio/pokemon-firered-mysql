@@ -4,6 +4,7 @@ import PokemonPickerModal from './PokemonPickerModal';
 import ItemPickerModal from './ItemPickerModal';
 import MovePickerModal from './MovePickerModal';
 import BagBuilderModal from './BagBuilderModal';
+import StatsEditorModal from './StatsEditorModal';
 import {
   getPokedex,
   getHeldItems,
@@ -37,6 +38,7 @@ export default function TeamOverview({
   // Modais
   const [activeSlotForPokemon, setActiveSlotForPokemon] = useState(null);
   const [activePokemonForItem, setActivePokemonForItem] = useState(null);
+  const [activePokemonForStats, setActivePokemonForStats] = useState(null);
   const [activeMoveTarget, setActiveMoveTarget] = useState(null); // { pokemon, movimentoAtual }
   const [showBagBuilder, setShowBagBuilder] = useState(false);
 
@@ -329,6 +331,7 @@ export default function TeamOverview({
               onOpenPokemonPicker={(pos) => setActiveSlotForPokemon(pos)}
               onOpenItemPicker={(p) => setActivePokemonForItem(p)}
               onOpenMovePicker={(p, mov) => setActiveMoveTarget({ pokemon: p, movimentoAtual: mov })}
+              onOpenStatsModal={(p) => setActivePokemonForStats(p)}
               onRemovePokemon={handleRemovePokemon}
             />
           );
@@ -372,6 +375,16 @@ export default function TeamOverview({
           mochila={mochila}
           onUpdateQuantity={handleUpdateMochilaQty}
           onClose={() => setShowBagBuilder(false)}
+        />
+      )}
+
+      {/* MODAL: Editor de IVs, EVs e Habilidade */}
+      {activePokemonForStats && (
+        <StatsEditorModal
+          pokemon={activePokemonForStats}
+          onClose={() => setActivePokemonForStats(null)}
+          onSaved={() => carregarTime(currentTrainerId)}
+          onNotify={onNotify}
         />
       )}
     </div>

@@ -1,25 +1,6 @@
 import React from 'react';
 import sounds from '../../services/soundEffects';
-
-const typeClassMap = {
-  Normal: 'type-normal',
-  Fogo: 'type-fogo',
-  Água: 'type-agua',
-  Planta: 'type-planta',
-  Elétrico: 'type-eletrico',
-  Gelo: 'type-gelo',
-  Lutador: 'type-lutador',
-  Venenoso: 'type-venenoso',
-  Terra: 'type-terra',
-  Voador: 'type-voador',
-  Psíquico: 'type-psiquico',
-  Inseto: 'type-inseto',
-  Pedra: 'type-pedra',
-  Fantasma: 'type-fantasma',
-  Dragão: 'type-dragao',
-  Aço: 'type-aco',
-  Noturno: 'type-noturno'
-};
+import { getTypeClass } from '../../utils/typeHelper';
 
 export default function PokemonCard({
   pokemon,
@@ -27,6 +8,7 @@ export default function PokemonCard({
   onOpenPokemonPicker,
   onOpenItemPicker,
   onOpenMovePicker,
+  onOpenStatsModal,
   onRemovePokemon
 }) {
   if (!pokemon) {
@@ -161,12 +143,12 @@ export default function PokemonCard({
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', gap: '4px', marginBottom: '8px' }}>
             {pokemon.tipo1_nome && (
-              <span className={`type-badge ${typeClassMap[pokemon.tipo1_nome] || 'type-normal'}`}>
+              <span className={`type-badge ${getTypeClass(pokemon.tipo1_nome)}`}>
                 {pokemon.tipo1_nome}
               </span>
             )}
             {pokemon.tipo2_nome && (
-              <span className={`type-badge ${typeClassMap[pokemon.tipo2_nome] || 'type-normal'}`}>
+              <span className={`type-badge ${getTypeClass(pokemon.tipo2_nome)}`}>
                 {pokemon.tipo2_nome}
               </span>
             )}
@@ -180,6 +162,54 @@ export default function PokemonCard({
             <span>SPD: <strong>{pokemon.velocidade}</strong></span>
           </div>
         </div>
+      </div>
+
+      {/* Habilidade & Editor de IVs/EVs */}
+      <div style={{ borderTop: '1px solid #334155', paddingTop: '10px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+          <span className="retro-text" style={{ fontSize: '8px', color: '#94a3b8' }}>
+            HABILIDADE:
+          </span>
+          <span style={{ fontSize: '11px', color: '#38bdf8', fontWeight: 'bold' }}>
+            ✨ {pokemon.habilidade_nome || 'Nenhuma'}
+          </span>
+        </div>
+
+        <button
+          onClick={() => {
+            sounds.playSelect();
+            if (onOpenStatsModal) onOpenStatsModal(pokemon);
+          }}
+          style={{
+            width: '100%',
+            padding: '7px 10px',
+            background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)',
+            border: '1px solid #6366f1',
+            borderRadius: '6px',
+            color: '#c7d2fe',
+            cursor: 'pointer',
+            textAlign: 'center',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            transition: 'all 0.15s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'linear-gradient(135deg, #312e81 0%, #4338ca 100%)';
+            e.currentTarget.style.borderColor = '#818cf8';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)';
+            e.currentTarget.style.borderColor = '#6366f1';
+          }}
+          title="Ajustar IVs (0-31), EVs (0-255) e Habilidade"
+        >
+          <span>⚙️</span>
+          <span className="retro-text" style={{ fontSize: '8px' }}>
+            EDITAR IVS, EVS & HABILIDADE
+          </span>
+        </button>
       </div>
 
       {/* Held Item */}
@@ -223,7 +253,7 @@ export default function PokemonCard({
         </span>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
           {(pokemon.movimentos || []).map((mov, index) => {
-            const typeClass = typeClassMap[mov.tipo_nome] || 'type-normal';
+            const typeClass = getTypeClass(mov.tipo_nome);
             return (
               <button
                 key={mov.movimento_id || index}

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import sounds from '../../services/soundEffects';
+import { TYPE_TRANSLATION_PT_EN, getTypeClass, formatTypeName } from '../../utils/typeHelper';
 
 const typesList = [
   'Todos', 'Normal', 'Fogo', 'Água', 'Planta', 'Elétrico', 'Gelo', 
@@ -14,9 +15,12 @@ export default function PokemonPickerModal({ pokedex = [], onSelect, onClose }) 
   const filtered = pokedex.filter((p) => {
     const matchesSearch = p.nome.toLowerCase().includes(search.toLowerCase()) ||
                           p.id_pokedex.toString().includes(search);
+    const enType = TYPE_TRANSLATION_PT_EN[selectedType] || selectedType;
+    const t1 = p.tipo1 || p.tipo1_nome;
+    const t2 = p.tipo2 || p.tipo2_nome;
     const matchesType = selectedType === 'Todos' ||
-                        p.tipo1_nome === selectedType ||
-                        p.tipo2_nome === selectedType;
+                        t1 === selectedType || t1 === enType ||
+                        t2 === selectedType || t2 === enType;
     return matchesSearch && matchesType;
   });
 
@@ -105,6 +109,8 @@ export default function PokemonPickerModal({ pokedex = [], onSelect, onClose }) 
         >
           {filtered.map((pok) => {
             const spriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pok.id_pokedex}.png`;
+            const t1 = pok.tipo1 || pok.tipo1_nome;
+            const t2 = pok.tipo2 || pok.tipo2_nome;
             return (
               <button
                 key={pok.id_pokedex}
@@ -169,12 +175,14 @@ export default function PokemonPickerModal({ pokedex = [], onSelect, onClose }) 
                 </span>
 
                 <div style={{ display: 'flex', gap: '4px', marginTop: '6px' }}>
-                  <span className="type-badge" style={{ fontSize: '7px', padding: '2px 4px' }}>
-                    {pok.tipo1_nome}
-                  </span>
-                  {pok.tipo2_nome && (
-                    <span className="type-badge" style={{ fontSize: '7px', padding: '2px 4px' }}>
-                      {pok.tipo2_nome}
+                  {t1 && (
+                    <span className={`type-badge ${getTypeClass(t1)}`} style={{ fontSize: '7px', padding: '2px 4px' }}>
+                      {formatTypeName(t1)}
+                    </span>
+                  )}
+                  {t2 && (
+                    <span className={`type-badge ${getTypeClass(t2)}`} style={{ fontSize: '7px', padding: '2px 4px' }}>
+                      {formatTypeName(t2)}
                     </span>
                   )}
                 </div>
