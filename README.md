@@ -4,16 +4,6 @@
 
 ---
 
-## 👥 Integrantes da Equipe
-*(Preencha os nomes e RAs dos colegas antes do envio final, se aplicável)*
-1. Arthur (Responsável pelo envio)
-2. 
-3. 
-4. 
-5. 
-
----
-
 ## 🎮 Visão Geral da Arquitetura
 
 O projeto implementa integralmente a mecânica de **Pokémon FireRed (GameBoy Advance / Gen 3)** diretamente dentro do MySQL 8.0, atendendo a todos os requisitos do enunciado:
