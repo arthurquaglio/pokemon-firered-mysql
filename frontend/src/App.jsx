@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import RetroNavbar from './components/Common/RetroNavbar';
 import BattleArena from './components/Battle/BattleArena';
 import BattleLogSidebar from './components/Log/BattleLogSidebar';
+import TeamOverview from './components/Teambuilder/TeamOverview';
 import {
   iniciarBatalha,
   executarTurno,
@@ -234,14 +235,12 @@ export default function App() {
         )}
 
         {activeTab === 'teambuilder' && (
-          <div className="gba-panel-dark" style={{ padding: '30px', textAlign: 'center' }}>
-            <h2 className="retro-text" style={{ fontSize: '14px', color: '#f59e0b', marginBottom: '12px' }}>
-              🛠️ Construtor de Times (Showdown)
-            </h2>
-            <p style={{ color: '#94a3b8', fontSize: '13px' }}>
-              Componente sendo carregado para a Fase 3...
-            </p>
-          </div>
+          <TeamOverview
+            mochila={mochila}
+            onReloadMochila={carregarMochila}
+            onStartBattle={() => setActiveTab('opponents')}
+            onNotify={notify}
+          />
         )}
 
         {activeTab === 'opponents' && (
