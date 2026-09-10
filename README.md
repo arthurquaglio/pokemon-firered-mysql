@@ -198,6 +198,68 @@ mysql -u root -p --default-character-set=utf8mb4 < dump_pokemon_firered.sql
 | `05_dados_teste_e_batalha.sql` | Times canônicos do Red e Blue e views de consulta. |
 | `06_held_items_e_itens_batalha.sql` | Carga modular de held items e itens de inventário da mochila. |
 | `como_batalhar.sql` | Roteiro interativo passo a passo para testar batalhas, trocas, held items, cura e golpes diretamente no Workbench. |
+| `ESPECIFICACAO_WEB_APP.md` | Especificação técnica completa da arquitetura do aplicativo Web Full-Stack. |
+| `backend/` | API REST em Node.js / Express integrada ao MySQL 8.0 via `mysql2/promise`. |
+| `frontend/` | Interface visual retrô GBA em React (Vite) com Teambuilder Showdown e Web Audio API. |
 | `README.md` | Documentação técnica completa da arquitetura, regras de negócio e guia de execução. |
+
+---
+
+## 🌐 Como Executar a Aplicação Web Full-Stack
+
+A aplicação é composta por um backend Node.js que intermedeia o banco de dados MySQL e uma interface gráfica em React com visual clássico de GameBoy Advance (GBA) e construtor de equipes no estilo *Pokémon Showdown*.
+
+### 1. Pré-requisitos
+- **Node.js** v18+ instalado.
+- **MySQL 8.0** em execução local na porta 3306 com o banco `pokemon_firered` restaurado.
+
+### 2. Iniciar o Backend (API REST)
+```bash
+# Na raiz do projeto ou dentro da pasta backend:
+cd backend
+npm install
+npm start
+```
+*O servidor iniciará em `http://localhost:3001`.*
+
+### 3. Iniciar o Frontend (Interface GBA)
+```bash
+# Em outro terminal, na pasta frontend:
+cd frontend
+npm install
+npm run dev
+```
+*Acesse no navegador:* **`http://localhost:5173/`**
+
+### 4. Executar Testes Automatizados da API
+```bash
+cd backend
+npm test
+```
+*Executa a suíte de 11 testes integrados que valida consultas, turnos, trocas, itens e Stored Procedures diretamente no MySQL.*
+
+---
+
+## 📸 As 3 Telas da Aplicação Web
+
+1. **⚔️ Arena de Batalha (GBA)**:
+   - Sprites oficiais frontais e traseiros da PokéAPI CDN.
+   - Barras de HP com transições animadas suaves (verde/amarelo/vermelho).
+   - Menu clássico: `FIGHT` (grid de 4 golpes com tipo e PP), `BAG` (mochila de itens), `PKMN` (troca de Pokémon) e `RUN` (desistir).
+   - Sidebar de Logs em tempo real com auto-scroll e badges coloridas (Super Efetivo, Crítico, Leftovers, Desmaiou).
+   - Efeitos visuais: Screen-shake ao tomar dano crítico e piscar do sprite.
+
+2. **🛠️ Teambuilder (Estilo Showdown)**:
+   - Construtor com 6 slots para montar a equipe do treinador.
+   - Modal de busca dos 151 Pokémons de Kanto por nome e tipo.
+   - Seleção de golpes compatíveis por nível da espécie (`sp_trocar_movimento_pokemon`).
+   - Equipar e remover Held Items com efeitos oficiais (`sp_equipar_held_item`).
+   - Botão **Centro Pokémon (Enfermeira Joy)** para curar toda a equipe e restaurar PPs.
+   - Mochila do Treinador para ajustar poções e revives.
+
+3. **🥊 Seleção de Adversários**:
+   - Desafie o rival campeão **Blue** (6 Pokémons nível 50), o líder de pedra **Brock**, a líder de água **Misty** ou o líder elétrico **Lt. Surge**.
+   - Botão **Batalha Rápida (Random Match)** para sortear oponentes instantaneamente.
+
 
 
