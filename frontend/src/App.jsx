@@ -3,6 +3,7 @@ import RetroNavbar from './components/Common/RetroNavbar';
 import BattleArena from './components/Battle/BattleArena';
 import BattleLogSidebar from './components/Log/BattleLogSidebar';
 import TeamOverview from './components/Teambuilder/TeamOverview';
+import OpponentPicker from './components/OpponentPicker/OpponentPicker';
 import {
   iniciarBatalha,
   executarTurno,
@@ -244,14 +245,11 @@ export default function App() {
         )}
 
         {activeTab === 'opponents' && (
-          <div className="gba-panel-dark" style={{ padding: '30px', textAlign: 'center' }}>
-            <h2 className="retro-text" style={{ fontSize: '14px', color: '#38bdf8', marginBottom: '12px' }}>
-              🥊 Seleção de Oponentes
-            </h2>
-            <p style={{ color: '#94a3b8', fontSize: '13px' }}>
-              Componente sendo carregado para a Fase 4...
-            </p>
-          </div>
+          <OpponentPicker
+            onSelectOpponent={(id) => handleIniciarBatalha(id, true)}
+            onStartBattle={(id) => handleIniciarBatalha(id, true)}
+            loading={loading}
+          />
         )}
       </main>
     </div>
