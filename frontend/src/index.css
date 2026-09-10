@@ -1,0 +1,270 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Press+Start+2P&display=swap');
+
+:root {
+  --font-retro: 'Press Start 2P', monospace;
+  --font-modern: 'Outfit', sans-serif;
+  
+  --color-bg-dark: #0f172a;
+  --color-panel-bg: rgba(15, 23, 42, 0.92);
+  --color-gba-border: #334155;
+  --color-gba-box: #f8fafc;
+  --color-gba-text: #1e293b;
+  --color-accent-red: #ef4444;
+  --color-accent-blue: #3b82f6;
+  --color-accent-green: #22c55e;
+  --color-accent-yellow: #eab308;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--color-bg-dark);
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(239, 68, 68, 0.15) 0px, transparent 50%),
+    linear-gradient(rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.95)),
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.02) 0, rgba(255, 255, 255, 0.02) 1px, transparent 0, transparent 20px);
+  color: #f1f5f9;
+  font-family: var(--font-modern);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Pixel Art crisp rendering */
+.pixelated {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+/* Tipografia retrô */
+.retro-text {
+  font-family: var(--font-retro);
+  letter-spacing: 0.5px;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.8);
+}
+::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Animações de Batalha */
+.screen-shake {
+  animation: screen-shake 0.45s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes screen-shake {
+  0%, 100% { transform: translate(0, 0); }
+  15% { transform: translate(-8px, 6px); }
+  30% { transform: translate(8px, -6px); }
+  45% { transform: translate(-6px, 4px); }
+  60% { transform: translate(6px, -4px); }
+  75% { transform: translate(-3px, 2px); }
+  90% { transform: translate(3px, -2px); }
+}
+
+.sprite-damaged {
+  animation: sprite-flicker 0.6s ease-in-out;
+}
+
+@keyframes sprite-flicker {
+  0%, 100% { opacity: 1; filter: none; }
+  20% { opacity: 0.2; filter: brightness(2.5) contrast(1.5); }
+  40% { opacity: 1; filter: none; }
+  60% { opacity: 0.2; filter: brightness(2.5) contrast(1.5); }
+  80% { opacity: 1; filter: none; }
+}
+
+.sprite-entry {
+  animation: sprite-entry 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes sprite-entry {
+  0% { transform: scale(0.2) translateY(50px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* Caixa de Diálogo GBA Clássica */
+.gba-box {
+  background: #ffffff;
+  border: 4px solid #1e293b;
+  border-radius: 8px;
+  box-shadow: 
+    inset 0 0 0 2px #cbd5e1,
+    0 4px 12px rgba(0, 0, 0, 0.4);
+  color: #0f172a;
+}
+
+.gba-panel-dark {
+  background: #1e293b;
+  border: 3px solid #334155;
+  border-radius: 12px;
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 10px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+/* Botões Retrô */
+.btn-retro {
+  font-family: var(--font-retro);
+  font-size: 11px;
+  padding: 10px 16px;
+  border: 3px solid #000;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 0 #000;
+  user-select: none;
+}
+
+.btn-retro:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 #000;
+}
+
+.btn-retro:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #000;
+}
+
+.btn-retro:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 4px 0 #000;
+}
+
+/* Cores de Botões */
+.btn-fight { background: #ef4444; color: #fff; }
+.btn-fight:hover { background: #dc2626; }
+
+.btn-bag { background: #f59e0b; color: #fff; }
+.btn-bag:hover { background: #d97706; }
+
+.btn-pokemon { background: #10b981; color: #fff; }
+.btn-pokemon:hover { background: #059669; }
+
+.btn-run { background: #64748b; color: #fff; }
+.btn-run:hover { background: #475569; }
+
+.btn-primary { background: #3b82f6; color: #fff; }
+.btn-primary:hover { background: #2563eb; }
+
+/* Tipos Elementais */
+.type-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.type-normal { background: #A8A878; }
+.type-fogo { background: #F08030; }
+.type-agua { background: #6890F0; }
+.type-planta { background: #78C850; }
+.type-eletrico { background: #F8D030; color: #222 !important; text-shadow: none !important; }
+.type-gelo { background: #98D8D8; color: #222 !important; text-shadow: none !important; }
+.type-lutador { background: #C03028; }
+.type-venenoso { background: #A040A0; }
+.type-terra { background: #E0C068; }
+.type-voador { background: #A890F0; }
+.type-psiquico { background: #F85888; }
+.type-inseto { background: #A8B820; }
+.type-pedra { background: #B8A038; }
+.type-fantasma { background: #705898; }
+.type-dragao { background: #7038F8; }
+.type-aco { background: #B8B8D0; color: #222 !important; text-shadow: none !important; }
+.type-noturno { background: #705848; }
+
+/* Barra de Vida HP */
+.hp-bar-container {
+  width: 100%;
+  height: 10px;
+  background: #334155;
+  border: 2px solid #0f172a;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.hp-bar-fill {
+  height: 100%;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.4s ease;
+  border-radius: 4px;
+}
+
+.hp-high {
+  background: linear-gradient(180deg, #4ade80 0%, #22c55e 100%);
+}
+
+.hp-medium {
+  background: linear-gradient(180deg, #facc15 0%, #eab308 100%);
+}
+
+.hp-low {
+  background: linear-gradient(180deg, #f87171 0%, #ef4444 100%);
+  animation: hp-blink 1s infinite alternate;
+}
+
+@keyframes hp-blink {
+  0% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+/* Modais estilizados */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 16px;
+}
+
+.modal-content {
+  background: #1e293b;
+  border: 3px solid #475569;
+  border-radius: 16px;
+  max-width: 680px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+  animation: modal-enter 0.25s ease-out;
+}
+
+@keyframes modal-enter {
+  0% { transform: scale(0.95); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
